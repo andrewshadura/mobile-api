@@ -1,0 +1,84 @@
+--
+Bike Issues - hlášení závad a aktualizace jejich stavů.
+
+Funguje to podobně, jako Github issues. Nahlášení závady = vytvoření issue.
+
+K existujícím issues lze přidávat updaty, které obsahují nějaký komentář a můžou změnit stav issue:
+
+- Otevřené/zavřené.
+- Znepojízdňující/neznepojízdňující. (pokud je issue otevřené a znepojízdňující, tak je kolo považované za nepojízdné a neobjevuje se ve výpisu).
+--
+
+
+Vytvoření nového issue.
+
+- `title` - Název problému.
+- `description` - Popis závady od uživatele.
+- `disabling` - TRUE = kolo není schopné jízdy.
+- `location` - Místo, odkud uživatel závadu hlásí.
+POST /bikes/{bikeId}/issues
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "title": "Název issue",
+    "description": "Komentář",
+    "disabling": true,
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 201
+
+
+Aktualizace stavu issue.
+
+- `description` - Popis aktualizace.
+- `open` - Jestli issue zůstává otevřené.
+- `disabling` (volitelně) - Jestli issue znepojízdňuje kolo. Pokud není uvedeno, tak se dosadí hodnota z předchozího updatu.
+- `costs`
+    - `material` - Cena dílů v korunách.
+    - `time` - Čas strávený opravou v minutách.
+POST /bikes/{bikeId}/issues/{issueId}/updates
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "description": "Komentář",
+    "open": true,
+    "disabling": true,
+    "costs": {
+        "material": 123.45,
+        "time": 20
+    },
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 201
+
+
+Získání seznamu issues ke kolu.
+
+- `onlyOpen=1` - Vrátí pouze otevřená issues.
+
+Status v odpovědi může být "closed", "open_minor" nebo "open_disabling".
+
+GET /bikes/{bikeId}/issues?onlyOpen=1
+> X-Api-Key: token
+< 200
+[
+    {
+        "id": 123,
+        "title": "Název issue",
+        "status": "open_minor",
+        "updates": [
+            {
+                "author": "Jméno",
+                "description": "Popis",
+                "issuedAt": "Thu, 19 Sep 2013 13:40:48 +0200"
+            }
+        ]
+    }
+]
+

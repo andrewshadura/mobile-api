@@ -1,0 +1,17 @@
+Získání seznamu kol ve formátu KML
+GET /bikes/kml
+< 200
+< Content-Type: application/xml
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+    <Document>
+        <Placemark>
+            <name>Název kola</name>
+            <description>Popis kola, bla bla bla...</description>
+            <Point>
+                <coordinates>14.4346,50.0721</coordinates>
+            </Point>
+        </Placemark>
+    </Document>
+</kml>
+

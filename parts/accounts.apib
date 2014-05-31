@@ -1,0 +1,108 @@
+--
+Accounts
+
+Akce spojené s uživatelským účtem.
+--
+
+Úspěšné přihlášení k účtu.
+
+V požadavku se zašle jméno a heslo, odpověď vrací API key, který se pak připojuje ke všem dalším requestům.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
+< 200
+< Content-Type: application/json
+{
+    "apiKey": "zzz"
+}
+
+
+Neúspěšné přihlášení - špatné jméno/heslo.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
+< 401
+{
+    "message": "Přihlašte se prosím ke svému účtu."
+}
+
+
+Úspěšné přihlášení přes SMS
+POST /accounts/mine/loginSMS
+> Content-Type: application/json
+{
+    "phone": "+420775098144",
+    "nonce": "d8a5d3e840006c68ce323fd87545018c2449e4d3",
+    "hash": "759188915277666883b2929ee20893ee30634508860c7b3ba11576c2919b5088ff5351a30a7e3810d9db9e95536395886c6c2a15ddd1a3a087208dcfa4cff88a"
+}
+< 200
+< Content-Type: application/json
+{
+    "apiKey": "zzz"
+}
+
+
+Neúspěšné přihlášení přes SMS - špatný hash nebo telefon neexistuje.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
+< 401
+{
+    "message": "Přihlašte se prosím ke svému účtu."
+}
+< 403
+{
+    "message": "Hash není správný"
+}
+
+
+Ping po zapnutí aplikace
+POST /accounts/mine/ping
+> X-Api-Key: token
+{
+    "location": {
+        "lat": 50.123,
+        "lng": 15.123
+    }
+}
+< 200
+
+
+Změna hesla k účtu
+PUT /accounts/mine/password
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "newPassword": "Nové heslo"
+}
+< 201
+
+
+400 - Změna hesla - příliš krátké heslo
+PUT /accounts/mine/password
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "newPassword": "a"
+}
+< 400
+< Content-Type: application/json
+{
+    "message": "Heslo musí mít alespoň 3 znaky."
+}
+
+
+Odhlášení (zneplatnění tokenu).
+GET /accounts/mine/logout
+< 200
+
+

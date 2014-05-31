@@ -1,0 +1,341 @@
+--
+Bikes
+
+Dotazy na seznam kol.
+--
+
+Dotaz na kola v okolí. Vrátí 20 nejbližších kol.
+
+- Vrací seznam kol se všemi podrobnostmi, seřazený vzestupně podle vzdálenosti.
+- Běžnému uživateli vrací pouze pojízdná kola.
+- Adminovi vrací i nepojízdná kola.
+
+Parametry:
+
+- `lat` Severní šířka
+- `lng` Západní délka
+GET /bikes?lat=50.071667&lng=14.433804
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+[
+    {
+        "id": 123,
+        "name": "Kolo kolo mlýnské",
+        "description": "horské kolo s gumama jako salámy",
+        "issue": "nesvítí přední světlo",
+        "borrowed": false,
+        "operational": true,
+        "lastSeen": "30.10. 11:56",
+        "location": {
+            "lat": 50.0825967,
+            "lng": 14.4260456,
+            "address": "Václavské náměstí 19, Praha 1",
+            "distance": "120 m",
+            "type": "lamp",
+            "note": "u druhého patníku vlevo"
+        }
+    },
+    {
+        "id": 124,
+        "name": "Nějaké kolo",
+        "description": "dámské kolo s nosičem",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.0762711,
+            "lng": 14.4209292,
+            "address": "Vodičkova 33, Praha 2",
+            "distance": "180 m"
+        }
+    },
+    {
+        "id": 125,
+        "name": "Dárce orgánů",
+        "description": "silniční kolo, hajpa dajpa, upsala pluksa",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.1023075,
+            "lng": 14.3925300,
+            "address": "ulice Technická, Praha 5",
+            "distance": "1,2 km"
+        }
+    }
+]
+
+
+Všechna kola v provozu.
+
+- Vrací seznam kol se všemi podrobnostmi, seřazený vzestupně podle vzdálenosti.
+
+Parametry:
+
+- `lat` Severní šířka
+- `lng` Západní délka
+GET /bikes/all?lat=50.071667&lng=14.433804
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+[
+    {
+        "id": 123,
+        "name": "Kolo kolo mlýnské",
+        "description": "horské kolo s gumama jako salámy",
+        "issue": "nesvítí přední světlo",
+        "borrowed": false,
+        "operational": true,
+        "lastSeen": "30.10. 11:56",
+        "location": {
+            "lat": 50.0825967,
+            "lng": 14.4260456,
+            "address": "Václavské náměstí 19, Praha 1",
+            "distance": "120 m",
+            "type": "lamp",
+            "note": "u druhého patníku vlevo"
+        }
+    },
+    {
+        "id": 124,
+        "name": "Nějaké kolo",
+        "description": "dámské kolo s nosičem",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.0762711,
+            "lng": 14.4209292,
+            "address": "Vodičkova 33, Praha 2",
+            "distance": "180 m"
+        }
+    },
+    {
+        "id": 125,
+        "name": "Dárce orgánů",
+        "description": "silniční kolo, hajpa dajpa, upsala pluksa",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.1023075,
+            "lng": 14.3925300,
+            "address": "ulice Technická, Praha 5",
+            "distance": "1,2 km"
+        }
+    }
+]
+
+
+Získat vlastnosti kola podle jeho verifikačního kódu.
+GET /bikes/find-by-code?bikeCode=5678
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+{
+    "id": 124,
+    "name": "Nějaké kolo",
+    "description": "dámské kolo s nosičem",
+    "borrowed": false,
+    "operational": true,
+    "location": {
+        "lat": 50.0762711,
+        "lng": 14.4209292,
+        "address": "Vodičkova 33, Praha 2",
+        "distance": "180 m"
+    }
+}
+
+
+404 Verifikační kód neexistuje
+GET /bikes/find-by-code?bikeCode=blbost
+> X-Api-Key: token
+< 404
+< Content-Type: application/json
+{
+    "message": "Neznámý ověřovací kód."
+}
+
+
+--
+Bikes - půjčení kola
+--
+
+200 Získá kód zámku. Tím se kolo nastaví jako vypůjčené tímto uživatelem.
+
+Parametry:
+
+- `bikeCode` - Číslo napsané na kole
+- `lat` - Pozice z GPS.
+- `lng` - Pozice z GPS.
+GET /bikes/lock-code?bikeCode=ABCD&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+{
+    "lockCode": "1234",
+    "bike": {
+        "id": 124,
+        "name": "Nějaké kolo",
+        "description": "dámské kolo s nosičem",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.0762711,
+            "lng": 14.4209292,
+            "address": "Vodičkova 33, Praha 2",
+            "distance": "180 m"
+        }
+    }
+}
+
+
+400 Uživatel zadal špatné číslo kola.
+GET /bikes/lock-code?bikeCode=blbost&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 400
+{
+    "message": "Zadal jste špatný kód kola."
+}
+
+
+409 Pokud je kolo už někým vypůjčené, dostanu info, že bylo půjčeno před xx minutami.
+GET /bikes/lock-code?bikeCode=ABCD&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 409
+< Content-Type: application/json
+{
+    "message": "Kolo je již vypůjčeno.",
+    "borrowTime": "2013-08-06T12:34:56+0100"
+}
+
+
+403 Uživatel už má jedno kolo vypůjčené, nebo má ban, nebo jiný důvod, proč mu to kolo nepůjčit.
+GET /bikes/lock-code?bikeCode=ABCD&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 403
+< Content-Type: application/json
+{
+    "message": "Už máte jedno kolo vypůjčené."
+}
+
+
+--
+Bikes - vrácení kola
+--
+
+200 Vrácení kola - nastavuje se nová poloha
+
+**(admin)** Admin může vrátit i kolo, které nemá půjčené.
+PUT /bikes/{id}/return
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073,
+        "note": "Zábradlí na nábřeží"
+    }
+}
+< 200
+
+
+403 Pokus o vrácení kola, které nemá uživatel půjčené.
+PUT /bikes/{id}/return
+> X-Api-Key: token
+< 409
+{
+    "message": "Kolo nemáte půjčené."
+}
+
+
+--
+Bikes - zjištění stavu
+
+Mobilní klient sice ví, jaké kolo jsem si půjčil a nevrátil, ale mohl ho mezitím vrátit admin, nebo tentýž uživatel z jiného zařízení.
+--
+
+
+200 Kolo které mám momentálně půjčené
+
+Stejné informace, jako u GET /bikes, ale navíc bikeCode (tj. verifikační kód napsaný na kole) a lockCode (kód nastavený na zámku).
+GET /bikes/mine
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+{
+    "id": 666,
+    "name": "Clebot's bike",
+    "description": "Kolo s košíkem",
+    "issues": [],
+    "borrowed": true,
+    "operational": true,
+    "location": {
+        "lat": 50.0825967,
+        "lng": 14.4260456,
+        "address": "Václavské náměstí 19, Praha 1",
+        "distance": "120 m",
+        "type": "lamp",
+        "note": "u druhého patníku vlevo"
+    },
+    "bikeCode": "123456",
+    "lockCode": "1234"
+}
+
+
+200 Pokud žádné kolo nemám půjčené
+GET /bikes/mine
+> X-Api-Key: token
+< 404
+< Content-Type: application/json
+{
+    "message": "Nemáte žádné kolo půjčené."
+}
+
+
+--
+Bikes - Správa kola
+--
+
+<u>(wip)</u> **(admin)** 200 Změna kódu zámku
+POST /bikes/{id}/lock-code
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "lock-code": "1234",
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 201
+
+
+<u>(wip)</u> **(admin)** 200 Na základně notifikace (například o závadě) jedu ke kolu.
+
+Přidá ke kolu informaci, že ho tento admin-uživatel řeší.
+PUT /bikes/{id}/assignation
+> X-Api-Key: token
+< 201
+
+
+<u>(wip)</u> **(admin)** 204 Už kolo neřeším.
+DELETE /bikes/{id}/assignation
+> X-Api-Key: token
+< 204
+
+
+<u>(wip)</u> **(admin)** 200 Potvrzení statusu pojízdnosti.
+
+Potvrdí informaci o pojízdnosti/nepojízdnosti kola.
+POST /bikes/{id}/status
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "status": "broken",
+    "description": "Poznámka od admina",
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 200
+
+

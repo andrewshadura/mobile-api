@@ -1,0 +1,565 @@
+HOST: http://www.rekola.cz/api/
+
+--- ReKola API ---
+---
+API pro komunikaci mobilního klienta se serverem.
+
+Společné věci pro každý request:
+
+- X-Api-Key: token, který uživatel získal po přihlášení.
+- Error 401, pokud přihlašovací token není platný (např. session timeout).
+- Requesty značené **(admin)** vrací 403, pokud uživatel není admin.
+- Requesty značené <u>(wip)</u> zatím neodpovídají implementaci.
+---
+
+
+--
+Accounts
+
+Akce spojené s uživatelským účtem.
+--
+
+Úspěšné přihlášení k účtu.
+
+V požadavku se zašle jméno a heslo, odpověď vrací API key, který se pak připojuje ke všem dalším requestům.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
+< 200
+< Content-Type: application/json
+{
+    "apiKey": "zzz"
+}
+
+
+Neúspěšné přihlášení - špatné jméno/heslo.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
+< 401
+{
+    "message": "Přihlašte se prosím ke svému účtu."
+}
+
+
+Úspěšné přihlášení přes SMS
+POST /accounts/mine/loginSMS
+> Content-Type: application/json
+{
+    "phone": "+420775098144",
+    "nonce": "d8a5d3e840006c68ce323fd87545018c2449e4d3",
+    "hash": "759188915277666883b2929ee20893ee30634508860c7b3ba11576c2919b5088ff5351a30a7e3810d9db9e95536395886c6c2a15ddd1a3a087208dcfa4cff88a"
+}
+< 200
+< Content-Type: application/json
+{
+    "apiKey": "zzz"
+}
+
+
+Neúspěšné přihlášení přes SMS - špatný hash nebo telefon neexistuje.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
+< 401
+{
+    "message": "Přihlašte se prosím ke svému účtu."
+}
+< 403
+{
+    "message": "Hash není správný"
+}
+
+
+Ping po zapnutí aplikace
+POST /accounts/mine/ping
+> X-Api-Key: token
+{
+    "location": {
+        "lat": 50.123,
+        "lng": 15.123
+    }
+}
+< 200
+
+
+Změna hesla k účtu
+PUT /accounts/mine/password
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "newPassword": "Nové heslo"
+}
+< 201
+
+
+400 - Změna hesla - příliš krátké heslo
+PUT /accounts/mine/password
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "newPassword": "a"
+}
+< 400
+< Content-Type: application/json
+{
+    "message": "Heslo musí mít alespoň 3 znaky."
+}
+
+
+Odhlášení (zneplatnění tokenu).
+GET /accounts/mine/logout
+< 200
+
+
+--
+Bikes
+
+Dotazy na seznam kol.
+--
+
+Dotaz na kola v okolí. Vrátí 20 nejbližších kol.
+
+- Vrací seznam kol se všemi podrobnostmi, seřazený vzestupně podle vzdálenosti.
+- Běžnému uživateli vrací pouze pojízdná kola.
+- Adminovi vrací i nepojízdná kola.
+
+Parametry:
+
+- `lat` Severní šířka
+- `lng` Západní délka
+GET /bikes?lat=50.071667&lng=14.433804
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+[
+    {
+        "id": 123,
+        "name": "Kolo kolo mlýnské",
+        "description": "horské kolo s gumama jako salámy",
+        "issue": "nesvítí přední světlo",
+        "borrowed": false,
+        "operational": true,
+        "lastSeen": "30.10. 11:56",
+        "location": {
+            "lat": 50.0825967,
+            "lng": 14.4260456,
+            "address": "Václavské náměstí 19, Praha 1",
+            "distance": "120 m",
+            "type": "lamp",
+            "note": "u druhého patníku vlevo"
+        }
+    },
+    {
+        "id": 124,
+        "name": "Nějaké kolo",
+        "description": "dámské kolo s nosičem",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.0762711,
+            "lng": 14.4209292,
+            "address": "Vodičkova 33, Praha 2",
+            "distance": "180 m"
+        }
+    },
+    {
+        "id": 125,
+        "name": "Dárce orgánů",
+        "description": "silniční kolo, hajpa dajpa, upsala pluksa",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.1023075,
+            "lng": 14.3925300,
+            "address": "ulice Technická, Praha 5",
+            "distance": "1,2 km"
+        }
+    }
+]
+
+
+Všechna kola v provozu.
+
+- Vrací seznam kol se všemi podrobnostmi, seřazený vzestupně podle vzdálenosti.
+
+Parametry:
+
+- `lat` Severní šířka
+- `lng` Západní délka
+GET /bikes/all?lat=50.071667&lng=14.433804
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+[
+    {
+        "id": 123,
+        "name": "Kolo kolo mlýnské",
+        "description": "horské kolo s gumama jako salámy",
+        "issue": "nesvítí přední světlo",
+        "borrowed": false,
+        "operational": true,
+        "lastSeen": "30.10. 11:56",
+        "location": {
+            "lat": 50.0825967,
+            "lng": 14.4260456,
+            "address": "Václavské náměstí 19, Praha 1",
+            "distance": "120 m",
+            "type": "lamp",
+            "note": "u druhého patníku vlevo"
+        }
+    },
+    {
+        "id": 124,
+        "name": "Nějaké kolo",
+        "description": "dámské kolo s nosičem",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.0762711,
+            "lng": 14.4209292,
+            "address": "Vodičkova 33, Praha 2",
+            "distance": "180 m"
+        }
+    },
+    {
+        "id": 125,
+        "name": "Dárce orgánů",
+        "description": "silniční kolo, hajpa dajpa, upsala pluksa",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.1023075,
+            "lng": 14.3925300,
+            "address": "ulice Technická, Praha 5",
+            "distance": "1,2 km"
+        }
+    }
+]
+
+
+Získat vlastnosti kola podle jeho verifikačního kódu.
+GET /bikes/find-by-code?bikeCode=5678
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+{
+    "id": 124,
+    "name": "Nějaké kolo",
+    "description": "dámské kolo s nosičem",
+    "borrowed": false,
+    "operational": true,
+    "location": {
+        "lat": 50.0762711,
+        "lng": 14.4209292,
+        "address": "Vodičkova 33, Praha 2",
+        "distance": "180 m"
+    }
+}
+
+
+404 Verifikační kód neexistuje
+GET /bikes/find-by-code?bikeCode=blbost
+> X-Api-Key: token
+< 404
+< Content-Type: application/json
+{
+    "message": "Neznámý ověřovací kód."
+}
+
+
+--
+Bikes - půjčení kola
+--
+
+200 Získá kód zámku. Tím se kolo nastaví jako vypůjčené tímto uživatelem.
+
+Parametry:
+
+- `bikeCode` - Číslo napsané na kole
+- `lat` - Pozice z GPS.
+- `lng` - Pozice z GPS.
+GET /bikes/lock-code?bikeCode=ABCD&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+{
+    "lockCode": "1234",
+    "bike": {
+        "id": 124,
+        "name": "Nějaké kolo",
+        "description": "dámské kolo s nosičem",
+        "borrowed": false,
+        "operational": true,
+        "location": {
+            "lat": 50.0762711,
+            "lng": 14.4209292,
+            "address": "Vodičkova 33, Praha 2",
+            "distance": "180 m"
+        }
+    }
+}
+
+
+400 Uživatel zadal špatné číslo kola.
+GET /bikes/lock-code?bikeCode=blbost&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 400
+{
+    "message": "Zadal jste špatný kód kola."
+}
+
+
+409 Pokud je kolo už někým vypůjčené, dostanu info, že bylo půjčeno před xx minutami.
+GET /bikes/lock-code?bikeCode=ABCD&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 409
+< Content-Type: application/json
+{
+    "message": "Kolo je již vypůjčeno.",
+    "borrowTime": "2013-08-06T12:34:56+0100"
+}
+
+
+403 Uživatel už má jedno kolo vypůjčené, nebo má ban, nebo jiný důvod, proč mu to kolo nepůjčit.
+GET /bikes/lock-code?bikeCode=ABCD&lat=49.19&lng=16.61
+> X-Api-Key: token
+< 403
+< Content-Type: application/json
+{
+    "message": "Už máte jedno kolo vypůjčené."
+}
+
+
+--
+Bikes - vrácení kola
+--
+
+200 Vrácení kola - nastavuje se nová poloha
+
+**(admin)** Admin může vrátit i kolo, které nemá půjčené.
+PUT /bikes/{id}/return
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073,
+        "note": "Zábradlí na nábřeží"
+    }
+}
+< 200
+
+
+403 Pokus o vrácení kola, které nemá uživatel půjčené.
+PUT /bikes/{id}/return
+> X-Api-Key: token
+< 409
+{
+    "message": "Kolo nemáte půjčené."
+}
+
+
+--
+Bikes - zjištění stavu
+
+Mobilní klient sice ví, jaké kolo jsem si půjčil a nevrátil, ale mohl ho mezitím vrátit admin, nebo tentýž uživatel z jiného zařízení.
+--
+
+
+200 Kolo které mám momentálně půjčené
+
+Stejné informace, jako u GET /bikes, ale navíc bikeCode (tj. verifikační kód napsaný na kole) a lockCode (kód nastavený na zámku).
+GET /bikes/mine
+> X-Api-Key: token
+< 200
+< Content-Type: application/json
+{
+    "id": 666,
+    "name": "Clebot's bike",
+    "description": "Kolo s košíkem",
+    "issues": [],
+    "borrowed": true,
+    "operational": true,
+    "location": {
+        "lat": 50.0825967,
+        "lng": 14.4260456,
+        "address": "Václavské náměstí 19, Praha 1",
+        "distance": "120 m",
+        "type": "lamp",
+        "note": "u druhého patníku vlevo"
+    },
+    "bikeCode": "123456",
+    "lockCode": "1234"
+}
+
+
+200 Pokud žádné kolo nemám půjčené
+GET /bikes/mine
+> X-Api-Key: token
+< 404
+< Content-Type: application/json
+{
+    "message": "Nemáte žádné kolo půjčené."
+}
+
+
+--
+Bikes - Správa kola
+--
+
+<u>(wip)</u> **(admin)** 200 Změna kódu zámku
+POST /bikes/{id}/lock-code
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "lock-code": "1234",
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 201
+
+
+<u>(wip)</u> **(admin)** 200 Na základně notifikace (například o závadě) jedu ke kolu.
+
+Přidá ke kolu informaci, že ho tento admin-uživatel řeší.
+PUT /bikes/{id}/assignation
+> X-Api-Key: token
+< 201
+
+
+<u>(wip)</u> **(admin)** 204 Už kolo neřeším.
+DELETE /bikes/{id}/assignation
+> X-Api-Key: token
+< 204
+
+
+<u>(wip)</u> **(admin)** 200 Potvrzení statusu pojízdnosti.
+
+Potvrdí informaci o pojízdnosti/nepojízdnosti kola.
+POST /bikes/{id}/status
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "status": "broken",
+    "description": "Poznámka od admina",
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 200
+
+
+--
+Bike Issues - hlášení závad a aktualizace jejich stavů.
+
+Funguje to podobně, jako Github issues. Nahlášení závady = vytvoření issue.
+
+K existujícím issues lze přidávat updaty, které obsahují nějaký komentář a můžou změnit stav issue:
+
+- Otevřené/zavřené.
+- Znepojízdňující/neznepojízdňující. (pokud je issue otevřené a znepojízdňující, tak je kolo považované za nepojízdné a neobjevuje se ve výpisu).
+--
+
+
+Vytvoření nového issue.
+
+- `title` - Název problému.
+- `description` - Popis závady od uživatele.
+- `disabling` - TRUE = kolo není schopné jízdy.
+- `location` - Místo, odkud uživatel závadu hlásí.
+POST /bikes/{bikeId}/issues
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "title": "Název issue",
+    "description": "Komentář",
+    "disabling": true,
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 201
+
+
+Aktualizace stavu issue.
+
+- `description` - Popis aktualizace.
+- `open` - Jestli issue zůstává otevřené.
+- `disabling` (volitelně) - Jestli issue znepojízdňuje kolo. Pokud není uvedeno, tak se dosadí hodnota z předchozího updatu.
+- `costs`
+    - `material` - Cena dílů v korunách.
+    - `time` - Čas strávený opravou v minutách.
+POST /bikes/{bikeId}/issues/{issueId}/updates
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "description": "Komentář",
+    "open": true,
+    "disabling": true,
+    "costs": {
+        "material": 123.45,
+        "time": 20
+    },
+    "location": {
+        "lat": 50.073115,
+        "lng": 14.414073
+    }
+}
+< 201
+
+
+Získání seznamu issues ke kolu.
+
+- `onlyOpen=1` - Vrátí pouze otevřená issues.
+
+Status v odpovědi může být "closed", "open_minor" nebo "open_disabling".
+
+GET /bikes/{bikeId}/issues?onlyOpen=1
+> X-Api-Key: token
+< 200
+[
+    {
+        "id": 123,
+        "title": "Název issue",
+        "status": "open_minor",
+        "updates": [
+            {
+                "author": "Jméno",
+                "description": "Popis",
+                "issuedAt": "Thu, 19 Sep 2013 13:40:48 +0200"
+            }
+        ]
+    }
+]
+
+Získání seznamu kol ve formátu KML
+GET /bikes/kml
+< 200
+< Content-Type: application/xml
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+    <Document>
+        <Placemark>
+            <name>Název kola</name>
+            <description>Popis kola, bla bla bla...</description>
+            <Point>
+                <coordinates>14.4346,50.0721</coordinates>
+            </Point>
+        </Placemark>
+    </Document>
+</kml>
+
