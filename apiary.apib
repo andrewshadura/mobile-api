@@ -11,10 +11,7 @@ Společné věci pro každý request:
 - X-Api-Key: token, který uživatel získal po přihlášení.
 - Error 401, pokud přihlašovací token není platný (např. session timeout).
 - Requesty značené **(admin)** vrací 403, pokud uživatel není admin.
-- Requesty značené <u>(wip)</u> zatím neodpovídají implementaci.
 ---
-
-
 --
 Accounts
 
@@ -419,50 +416,19 @@ GET /bikes/mine
 Bikes - Správa kola
 --
 
-<u>(wip)</u> **(admin)** 200 Změna kódu zámku
-POST /bikes/{id}/lock-code
+
+Potvrzení statusu pojízdnosti.
+
+Vrací webview s informací o pojízdnosti/nepojízdnosti kola.
+GET /bikes/{id}/status-webview
 > X-Api-Key: token
-> Content-Type: application/json
-{
-    "lock-code": "1234",
-    "location": {
-        "lat": 50.073115,
-        "lng": 14.414073
-    }
-}
-< 201
-
-
-<u>(wip)</u> **(admin)** 200 Na základně notifikace (například o závadě) jedu ke kolu.
-
-Přidá ke kolu informaci, že ho tento admin-uživatel řeší.
-PUT /bikes/{id}/assignation
-> X-Api-Key: token
-< 201
-
-
-<u>(wip)</u> **(admin)** 204 Už kolo neřeším.
-DELETE /bikes/{id}/assignation
-> X-Api-Key: token
-< 204
-
-
-<u>(wip)</u> **(admin)** 200 Potvrzení statusu pojízdnosti.
-
-Potvrdí informaci o pojízdnosti/nepojízdnosti kola.
-POST /bikes/{id}/status
-> X-Api-Key: token
-> Content-Type: application/json
-{
-    "status": "broken",
-    "description": "Poznámka od admina",
-    "location": {
-        "lat": 50.073115,
-        "lng": 14.414073
-    }
-}
+> Accept: text/html
 < 200
-
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
 
 --
 Bike Issues - hlášení závad a aktualizace jejich stavů.
