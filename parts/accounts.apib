@@ -48,7 +48,7 @@ POST /accounts/mine/loginSMS
 }
 
 
-Neúspěšné přihlášení přes SMS - špatný hash nebo telefon neexistuje.
+Neúspěšné přihlášení přes SMS - telefon neexistuje.
 POST /accounts/mine/login
 > Content-Type: application/json
 {
@@ -56,10 +56,21 @@ POST /accounts/mine/login
     "password": "yyy"
 }
 < 401
+< Content-Type: application/json
 {
     "message": "Přihlašte se prosím ke svému účtu."
 }
+
+
+Neúspěšné přihlášení přes SMS - špatný hash.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
 < 403
+< Content-Type: application/json
 {
     "message": "Hash není správný"
 }
@@ -75,6 +86,28 @@ POST /accounts/mine/ping
     }
 }
 < 200
+
+
+Souhlas s podmínkami
+GET /accounts/mine/terms
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "message": "Terms accepted."
+}
+< 200
+
+
+Vrací webview s profilem přihlášeného uživatele
+GET /accounts/mine/profile-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
 
 
 Změna hesla k účtu
@@ -104,5 +137,4 @@ PUT /accounts/mine/password
 Odhlášení (zneplatnění tokenu).
 GET /accounts/mine/logout
 < 200
-
 

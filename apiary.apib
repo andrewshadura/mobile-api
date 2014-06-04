@@ -62,7 +62,7 @@ POST /accounts/mine/loginSMS
 }
 
 
-Neúspěšné přihlášení přes SMS - špatný hash nebo telefon neexistuje.
+Neúspěšné přihlášení přes SMS - telefon neexistuje.
 POST /accounts/mine/login
 > Content-Type: application/json
 {
@@ -70,10 +70,21 @@ POST /accounts/mine/login
     "password": "yyy"
 }
 < 401
+< Content-Type: application/json
 {
     "message": "Přihlašte se prosím ke svému účtu."
 }
+
+
+Neúspěšné přihlášení přes SMS - špatný hash.
+POST /accounts/mine/login
+> Content-Type: application/json
+{
+    "username": "xxx",
+    "password": "yyy"
+}
 < 403
+< Content-Type: application/json
 {
     "message": "Hash není správný"
 }
@@ -89,6 +100,28 @@ POST /accounts/mine/ping
     }
 }
 < 200
+
+
+Souhlas s podmínkami
+GET /accounts/mine/terms
+> X-Api-Key: token
+> Content-Type: application/json
+{
+    "message": "Terms accepted."
+}
+< 200
+
+
+Vrací webview s profilem přihlášeného uživatele
+GET /accounts/mine/profile-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
 
 
 Změna hesla k účtu
@@ -118,7 +151,6 @@ PUT /accounts/mine/password
 Odhlášení (zneplatnění tokenu).
 GET /accounts/mine/logout
 < 200
-
 
 --
 Bikes
@@ -368,6 +400,20 @@ PUT /bikes/{id}/return
 }
 
 
+Webview s informacemi o vrácení
+- Název vráceného kola
+- Délka půjčení
+GET /api/bikes/{id}/return-success-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
+
+
 --
 Bikes - zjištění stavu
 
@@ -430,6 +476,34 @@ GET /bikes/{id}/status-webview
 	...
 </html>
 
+
+Veškeré informace o kole - stav, vybavení.
+
+Obsahuje i odkaz na webview se závadami kola
+GET /bikes/{id}/info-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
+
+
+Informace o závadách daného kola včetně možnosti nahlášení nové.
+
+Vrací webview se seznamem aktuálních závat, včetně formuláře pro nahlášení nové závady.
+GET /bikes/{id}/issues-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
+
 --
 Bike Issues - hlášení závad a aktualizace jejich stavů.
 
@@ -439,6 +513,7 @@ K existujícím issues lze přidávat updaty, které obsahují nějaký komentá
 
 - Otevřené/zavřené.
 - Znepojízdňující/neznepojízdňující. (pokud je issue otevřené a znepojízdňující, tak je kolo považované za nepojízdné a neobjevuje se ve výpisu).
+
 --
 
 
@@ -530,4 +605,45 @@ GET /bikes/kml
         </Placemark>
     </Document>
 </kml>
+
+--
+Geolokace
+
+Dotazy na zjištění polohy zadané adresy a výpis POI.
+--
+
+Zjištění GPS polohy
+GET /location/geocode{?address}
+> X-Api-Key: token
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    "lat": "50.076720",
+    "lng": "14.435624"
+}
+
+
+Seznam POI - Point of interest.
+
+Vrací seznam statických POI, což mohou být různé stojany, ne/bezpečená místa, ...
+GET /location/pois
+> X-Api-Key: token
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+	[
+		{
+			"id": 123,
+			"lat": "50.076720",
+			"lng": "50.076720",
+			"type": "bay",
+			"description": "Stojan 551"
+		},
+		{
+			//...
+		}
+	],
+}
 

@@ -246,6 +246,20 @@ PUT /bikes/{id}/return
 }
 
 
+Webview s informacemi o vrácení
+- Název vráceného kola
+- Délka půjčení
+GET /api/bikes/{id}/return-success-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
+
+
 --
 Bikes - zjištění stavu
 
@@ -299,6 +313,34 @@ Potvrzení statusu pojízdnosti.
 
 Vrací webview s informací o pojízdnosti/nepojízdnosti kola.
 GET /bikes/{id}/status-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
+
+
+Veškeré informace o kole - stav, vybavení.
+
+Obsahuje i odkaz na webview se závadami kola
+GET /bikes/{id}/info-webview
+> X-Api-Key: token
+> Accept: text/html
+< 200
+< Content-Type: text/html
+<!DOCTYPE HTML>
+<html>
+	...
+</html>
+
+
+Informace o závadách daného kola včetně možnosti nahlášení nové.
+
+Vrací webview se seznamem aktuálních závat, včetně formuláře pro nahlášení nové závady.
+GET /bikes/{id}/issues-webview
 > X-Api-Key: token
 > Accept: text/html
 < 200

@@ -1,0 +1,41 @@
+--
+Geolokace
+
+Dotazy na zjištění polohy zadané adresy a výpis POI.
+--
+
+Zjištění GPS polohy
+GET /location/geocode{?address}
+> X-Api-Key: token
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+    "lat": "50.076720",
+    "lng": "14.435624"
+}
+
+
+Seznam POI - Point of interest.
+
+Vrací seznam statických POI, což mohou být různé stojany, ne/bezpečená místa, ...
+GET /location/pois
+> X-Api-Key: token
+> Accept: application/json
+< 200
+< Content-Type: application/json
+{
+	[
+		{
+			"id": 123,
+			"lat": "50.076720",
+			"lng": "50.076720",
+			"type": "bay",
+			"description": "Stojan 551"
+		},
+		{
+			//...
+		}
+	],
+}
+
