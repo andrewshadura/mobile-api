@@ -1,0 +1,20 @@
+
+--
+* Request/Response
+
+Povinné hlavičky požadavků:
+
+- `X-Api-Version: <verze API>`
+ * Verze API protokolu používaná klientskou aplikací.
+ * V případě, že je verze neaktuální, vrací chybu `426 Upgrade Required`
+
+- `X-Api-Key: <klíč uživatele>`
+ * Slouží k autentizaci uživatele
+ * Není vyžadována pouze u přihlašování uživatelů - `login` a `loginSMS`.
+
+- `Accept-Language: <kód jazyka>`
+ * Standardní Accept-Language hlavička jako v prohlížečích. ISO kód (cs, cs_CZ)
+ * Rozhoduje o jazyku odpovědi (především pro webviews)
+
+--
+

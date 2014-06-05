@@ -647,3 +647,58 @@ GET /location/pois
 	],
 }
 
+
+--
+* Kódy odpovědí
+
+**2xx** V pořádku:
+
+- `200 OK` - vše v pořádku, vrací výsledek dotazu (odpověď na GET)
+ - vrací `{data: ...}`
+- `201 Created` - vše v pořádku, entita byla vytvořena (odpověď na PUT/POST)
+ - vrací prázdnou odpověď
+- `204 No Content` - vše v pořádku, není co odpovídat (odpověď na DELETE)
+ - vrací prázdnou odpověď
+
+**3xx** Přesměrování
+- `303 See Other` - přesměrování při synchronizaci
+
+**4xx** Chyba klienta
+- `400 Bad Request` - neplatný požadavek (špatná data požadavku)
+- `401 Unauthorized` - neautorizovaný požadavek
+- `403 Forbidden` - nepovolený přístup
+- `404 Not Found` - nenalezeno
+- `405 Method Not Allowed` - metodu nelze na dané url použít (např.: DELETE /api/me)
+- `409 Conflict` - požadavek koliduje se stavem aplikace ale jinak je ve pořádku
+- `415 Unsupported Media Type` - nepodporovaný content-type
+- `426 Upgrade Required` - nepodporovaná verze Api
+
+
+**5xx** Server error
+
+- `500 Internal Server Error` - chyba serveru
+- `501 Not Implemented` - není implementováno
+- `503 Service Unavailable` - momentálně nedostupné
+
+--
+
+
+--
+* Request/Response
+
+Povinné hlavičky požadavků:
+
+- `X-Api-Version: <verze API>`
+ * Verze API protokolu používaná klientskou aplikací.
+ * V případě, že je verze neaktuální, vrací chybu `426 Upgrade Required`
+
+- `X-Api-Key: <klíč uživatele>`
+ * Slouží k autentizaci uživatele
+ * Není vyžadována pouze u přihlašování uživatelů - `login` a `loginSMS`.
+
+- `Accept-Language: <kód jazyka>`
+ * Standardní Accept-Language hlavička jako v prohlížečích. ISO kód (cs, cs_CZ)
+ * Rozhoduje o jazyku odpovědi (především pro webviews)
+
+--
+
