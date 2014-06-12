@@ -89,7 +89,7 @@ Tato stránka je čisté web-view. Pozor ovšem, obsahuje odkaz na stránku issu
 
 Zobrazuje mapu, kde je uprostřed fixed ikona polohy. Dole je pole pro textové upřesnění polohy. Odkliknutí pošle:
 
-> **[GET /bikes/{id}/return](http://docs.rekolacz.apiary.io/#bikesvrcenkola)** + `{"location":{"lat":50,"lng":14,"note":"Zábradlí"}}`  
+> **[PUT /bikes/{id}/return](http://docs.rekolacz.apiary.io/#bikesvrcenkola)** + `{"location":{"lat":50,"lng":14,"note":"Zábradlí"}}`  
 > **403 Forbidden**  
 > • uživatel vrací {id}, které nemá půjčené (to může jen admin)  
 > **200 OK** + `{"successUrl":"http://...?foo=bar&apikey=token"}`  
