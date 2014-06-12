@@ -19,6 +19,12 @@ GET /location/geocode{?address}
 Seznam POI - Point of interest.
 
 Vrací seznam statických POI, což mohou být různé stojany, ne/bezpečená místa, ...
+
+Zatím jsou evidovány dva typy:
+
+- `bay` - stojan
+- `grave` - nebezpečné místo (kde bylo ukradeno kolo)
+
 GET /location/pois
 > X-Api-Key: token
 > Accept: application/json
@@ -28,10 +34,10 @@ GET /location/pois
 	[
 		{
 			"id": 123,
+			"name": "Stojan 551",
 			"lat": "50.076720",
 			"lng": "50.076720",
-			"type": "bay",
-			"description": "Stojan 551"
+			"type": "bay"
 		},
 		{
 			//...
